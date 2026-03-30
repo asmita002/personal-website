@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>my mind, mapped</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════════
+       LIGHT MODE (default)
+    ═══════════════════════════════════════════ */
+    :root {
+      --surface:       rgba(255,255,255,0.62);
+      --surface-2:     rgba(255,255,255,0.84);
+      --border:        rgba(168,160,210,0.38);
+      --border-hi:     rgba(130,120,190,0.58);
+      --text:          #1E1B30;
+      --text-dim:      #6A6285;
+      --text-faint:    #A8A2C4;
+      --accent:        #7264A8;
+      --accent-dim:    #B0AACD;
+      --line:          rgba(160,152,205,0.42);
+      --line-hi:       rgba(114,100,168,0.7);
+      --backdrop-bg:   rgba(215,210,238,0.72);
+      --backdrop-blur: blur(10px);
+      --grain-opacity: 0.028;
+      --node-hover-shadow:
+        0 0 0 5px rgba(114,100,168,0.07),
+        0 4px 24px rgba(100,90,165,0.12);
+      --expanded-shadow:
+        0 0 0 1px rgba(114,100,168,0.12),
+        0 8px 48px rgba(90,80,155,0.14),
+        0 2px 12px rgba(90,80,155,0.08);
+    }
+
+    /* ═══════════════════════════════════════════
+       DARK MODE
+    ═══════════════════════════════════════════ */
+    [data-theme="dark"] {
+      --surface:       #181510;
+      --surface-2:     #201C15;
+      --border:        #38321F;
+      --border-hi:     #544A2E;
+      --text:          #E2DAC8;
+      --text-dim:      #A09080;
+      --text-faint:    #5A5040;
+      --accent:        #C9A96E;
+      --accent-dim:    #8A7040;
+      --line:          #282318;
+      --line-hi:       #4A4030;
+      --backdrop-bg:   rgba(11,10,8,0.74);
+      --backdrop-blur: none;
+      --grain-opacity: 0.045;
+      --node-hover-shadow:
+        0 0 0 4px rgba(201,169,110,0.06),
+        0 4px 24px rgba(0,0,0,0.4);
+      --expanded-shadow:
+        0 0 0 1px rgba(201,169,110,0.08),
+        0 8px 48px rgba(0,0,0,0.5),
+        0 2px 12px rgba(0,0,0,0.3);
+    }
+
+    /* ─── Reset ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+    button { background: none; border: none; cursor: pointer; padding: 0; }
+
+    /* ─── Body / Background ──────────────────── */
+    body {
+      /* Light mode: dreamy duotone gradient */
+      background:
+        radial-gradient(ellipse 62% 110% at 12% 48%, #BDC8DC 0%, transparent 60%),
+        radial-gradient(ellipse 50% 75% at 38% 25%, #C8CEDF 0%, transparent 52%),
+        radial-gradient(ellipse 55% 65% at 42% 70%, #C6C2DD 0%, transparent 52%),
+        radial-gradient(ellipse 72% 72% at 78% 52%, #DDD6EC 0%, transparent 62%),
+        radial-gradient(ellipse 45% 55% at 62% 82%, #D8D0EA 0%, transparent 50%),
+        #D2CEEA;
+      transition: background 0.6s ease;
+    }
+
+    [data-theme="dark"] body {
+      background: #0B0A08;
+    }
+
+    /* ─── Grain ──────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");
+      opacity: var(--grain-opacity);
+      pointer-events: none;
+      z-index: 200;
+      transition: opacity 0.5s ease;
+    }
+
+    /* ─── Canvas ─────────────────────────────── */
+    #canvas { position: relative; width: 100%; height: 100%; }
+
+    /* ─── SVG Lines ──────────────────────────── */
+    #connections {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .conn {
+      fill: none;
+      stroke-width: 1;
+      stroke-dasharray: 2000;
+      stroke-dashoffset: 2000;
+    }
+
+    /* ─── Center / Brain ────────────────────── */
+    #title-center {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    #brain-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    #brain-svg {
+      display: block;
+    }
+
+    .brain-outline {
+      fill: none;
+      stroke: var(--text-dim);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke 0.5s ease;
+    }
+
+    #brain-text {
+      position: absolute;
+      top: 43%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    #brain-text h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: clamp(18px, 2vw, 30px);
+      color: var(--text);
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+      transition: color 0.5s ease;
+    }
+
+    #brain-text .subtitle {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 8px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-top: 10px;
+      transition: color 0.5s ease;
+    }
+
+    /* ─── Backdrop ───────────────────────────── */
+    #backdrop {
+      position: fixed; inset: 0;
+      background: var(--backdrop-bg);
+      backdrop-filter: var(--backdrop-blur);
+      -webkit-backdrop-filter: var(--backdrop-blur);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      z-index: 4;
+    }
+
+    #backdrop.visible {
+      opacity: 1;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    /* ─── Nodes ──────────────────────────────── */
+    .node {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0.6);
+      opacity: 0;
+
+      background: var(--surface);
+      border: 1px solid var(--border);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+
+      cursor: pointer;
+      z-index: 5;
+      overflow: hidden;
+
+      transition:
+        width      0.55s cubic-bezier(0.16, 1, 0.3, 1),
+        height     0.55s cubic-bezier(0.16, 1, 0.3, 1),
+        border-radius 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+        background 0.4s ease,
+        border-color 0.4s ease,
+        opacity    0.4s ease,
+        left       0.55s cubic-bezier(0.16, 1, 0.3, 1),
+        top        0.55s cubic-bezier(0.16, 1, 0.3, 1),
+        transform  0.55s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.4s ease;
+    }
+
+    .node.ready {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    .node:hover:not(.expanded):not(.dimmed) {
+      background: var(--surface-2);
+      border-color: var(--border-hi);
+      box-shadow: var(--node-hover-shadow);
+    }
+
+    /* ─── Collapsed inner ────────────────────── */
+    .node-collapsed {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      width: 100%;
+      transition: opacity 0.2s ease;
+    }
+
+    .node.expanded .node-collapsed {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .node-index {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      color: var(--accent-dim);
+      transition: color 0.3s ease;
+    }
+
+    .node-label {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text);
+      transition: color 0.3s ease;
+    }
+
+    .node:hover:not(.expanded) .node-index { color: var(--accent); }
+
+    /* ─── Expanded state ─────────────────────── */
+    .node.expanded {
+      width: 340px;
+      height: 310px;
+      border-radius: 20px;
+      background: var(--surface-2);
+      border-color: var(--border-hi);
+      z-index: 10;
+      cursor: default;
+      box-shadow: var(--expanded-shadow);
+      overflow: visible;
+    }
+
+    /* ─── Expanded content ───────────────────── */
+    .node-detail {
+      position: absolute;
+      inset: 0;
+      padding: 30px 30px 26px;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease 0.25s;
+    }
+
+    .node.expanded .node-detail {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .node-detail-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .node-detail-num {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      opacity: 0.8;
+    }
+
+    .node-close {
+      font-size: 20px;
+      line-height: 1;
+      color: var(--text-faint);
+      transition: color 0.2s ease;
+      cursor: pointer;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .node-close:hover { color: var(--text); }
+
+    .node-detail-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-style: normal;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      text-transform: capitalize;
+      color: var(--text);
+      margin-bottom: 13px;
+      transition: color 0.4s ease;
+    }
+
+    .node-detail-divider {
+      width: 28px;
+      height: 1px;
+      background: var(--border-hi);
+      margin-bottom: 15px;
+      transition: background 0.4s ease;
+    }
+
+    .node-detail-body {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--text-dim);
+      flex: 1;
+      transition: color 0.4s ease;
+    }
+
+    .node-detail-footer {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .node-enter-link {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: gap 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+    }
+
+    .node-enter-link:hover { gap: 14px; }
+    .node-enter-link:active { opacity: 0.7; }
+
+    .node-enter-arrow {
+      display: inline-block;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .node-enter-link:hover .node-enter-arrow { transform: translateX(4px); }
+
+    .node-accent-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.35;
+    }
+
+    /* ─── About node: wider expanded card ────── */
+    #node-about.expanded {
+      width: 400px;
+      height: 440px;
+    }
+
+    .about-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .about-photo {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center top;
+      border: 1px solid var(--border-hi);
+      flex-shrink: 0;
+    }
+
+    .about-identity {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .about-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 20px;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      transition: color 0.4s ease;
+    }
+
+    .about-role {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      transition: color 0.4s ease;
+    }
+
+    .about-degree {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      transition: color 0.4s ease;
+    }
+
+    .about-bio {
+      overflow-y: auto;
+      flex: 1;
+      scrollbar-width: none;
+    }
+
+    .about-bio::-webkit-scrollbar { display: none; }
+
+    /* ─── Contact node: inline links ─────────── */
+    .contact-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .contact-link {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .contact-link:hover { opacity: 0.7; }
+
+    .contact-link-label {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      width: 48px;
+      flex-shrink: 0;
+      transition: color 0.4s ease;
+    }
+
+    .contact-link-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 14px;
+      color: var(--text-dim);
+      transition: color 0.4s ease;
+    }
+
+    /* ─── Dimmed ─────────────────────────────── */
+    .node.dimmed {
+      opacity: 0.08;
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    /* ─── Dark mode toggle ───────────────────── */
+    #theme-toggle {
+      position: fixed;
+      top: 26px; right: 32px;
+      z-index: 100;
+      width: 36px; height: 20px;
+      border-radius: 10px;
+      background: var(--border-hi);
+      border: 1px solid var(--border-hi);
+      cursor: pointer;
+      opacity: 0;
+      transition:
+        background 0.4s ease,
+        border-color 0.4s ease,
+        opacity 0.5s ease;
+      display: flex;
+      align-items: center;
+      padding: 2px;
+    }
+
+    #theme-toggle::after {
+      content: '';
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--text-faint);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s ease;
+      flex-shrink: 0;
+    }
+
+    [data-theme="dark"] #theme-toggle::after {
+      transform: translateX(16px);
+      background: var(--accent);
+    }
+
+    #theme-toggle:hover::after { background: var(--accent); }
+
+    /* ─── Corner / Hint ──────────────────────── */
+    #corner {
+      position: fixed;
+      top: 28px; left: 32px;
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.5s ease, color 0.4s ease;
+    }
+
+    #hint {
+      position: fixed;
+      bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      z-index: 3;
+      opacity: 0;
+      transition: opacity 0.5s ease, color 0.4s ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    #hint.visible { opacity: 1; }
+    #hint.hidden  { opacity: 0; }
+
+    /* ─── Keyframes ──────────────────────────── */
+    @keyframes fadeInTitle {
+      from { opacity: 0; transform: translate(-50%, calc(-50% + 10px)); }
+      to   { opacity: 1; transform: translate(-50%, -50%); }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="corner">Asmita Pramanik</div>
+  <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode"></button>
+  <div id="hint">select a node to explore</div>
+  <div id="backdrop"></div>
+
+  <div id="canvas">
+    <svg id="connections" aria-hidden="true"></svg>
+
+    <div id="title-center">
+      <div id="brain-wrapper">
+        <!-- Brain outline: 220×180 viewBox, displayed 190×155px -->
+        <svg id="brain-svg" viewBox="0 0 220 180" width="190" height="155" aria-hidden="true">
+          <defs>
+            <filter id="roughen" x="-5%" y="-5%" width="110%" height="110%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="3" result="noise"/>
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6"
+                xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+          </defs>
+          <!-- Outer soft halo -->
+          <path class="brain-outline" style="stroke-width:4;opacity:0.15;" filter="url(#roughen)"
+            d="M 16,88 C 14,60 24,32 56,16 C 88,0 126,-2 160,16 C 192,32 212,68 208,100 C 204,130 186,154 164,162 L 164,173 C 164,178 156,180 150,176 C 144,172 144,158 140,155 C 108,163 76,161 48,150 C 22,138 18,114 16,88 Z"/>
+          <!-- Main outline -->
+          <path class="brain-outline" filter="url(#roughen)"
+            d="M 16,88 C 14,60 24,32 56,16 C 88,0 126,-2 160,16 C 192,32 212,68 208,100 C 204,130 186,154 164,162 L 164,173 C 164,178 156,180 150,176 C 144,172 144,158 140,155 C 108,163 76,161 48,150 C 22,138 18,114 16,88 Z"/>
+        </svg>
+        <div id="brain-text">
+          <h1>my mind,<br>mapped</h1>
+          <span class="subtitle">a personal atlas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 01 · About -->
+    <div class="node" id="node-about"
+         data-index="01" data-title="about"
+         data-body="Software Development Engineer at Tesla working on Supply Chain and Logistics systems. Early in my career and striving to call myself better at this than I was last year."  
+         data-href="about.html"
+         style="left:21%; top:26%">
+      <div class="node-collapsed">
+        <span class="node-index">01</span>
+        <span class="node-label">about</span>
+      </div>
+      <div class="node-detail"></div>
+    </div>
+
+    <!-- 02 · Career -->
+    <div class="node" id="node-career"
+         data-index="02" data-title="experience"
+         data-body="One year into the industry taught me that supply chain software sits at the intersection of scale, legacy systems, and real-time complexity. At Tesla, I help build the tooling that keeps that infrastructure running."
+         data-href="experience.html"
+         style="left:49%; top:11%">
+      <div class="node-collapsed">
+        <span class="node-index">02</span>
+        <span class="node-label">experience</span>
+      </div>
+      <div class="node-detail"></div>
+    </div>
+
+    <!-- 03 · Projects -->
+    <div class="node" id="node-work"
+         data-index="03" data-title="projects"
+         data-body="Projects built throughout my time at university, and now outside of work hours. Some completed, and some ongoing."
+         data-href="work.html"
+         style="left:76%; top:26%">
+      <div class="node-collapsed">
+        <span class="node-index">03</span>
+        <span class="node-label">projects</span>
+      </div>
+      <div class="node-detail"></div>
+    </div>
+
+    <!-- 04 · Blog -->
+    <div class="node" id="node-writing"
+         data-index="04" data-title="blog"
+         data-body="Notes on what I'm learning, building, and thinking about. No categories — just a quiet study of things I've enjoyed.         "
+         data-href="blog.html"
+         style="left:83%; top:65%">
+      <div class="node-collapsed">
+        <span class="node-index">04</span>
+        <span class="node-label">blog</span>
+      </div>
+      <div class="node-detail"></div>
+    </div>
+
+    <!-- 05 · Bookmarks -->
+    <div class="node" id="node-interests"
+         data-index="05" data-title="bookmarks"
+         data-body="My digital bookshelf of sorts. Articles, videos, tools, and ideas I keep coming back to."
+         data-href="bookmarks.html"
+         style="left:44%; top:82%">
+      <div class="node-collapsed">
+        <span class="node-index">05</span>
+        <span class="node-label">bookmarks</span>
+      </div>
+      <div class="node-detail"></div>
+    </div>
+
+    <!-- 06 · Contact -->
+    <div class="node" id="node-contact"
+         data-index="06" data-title="contact"
+         data-body=""
+         style="left:16%; top:67%">
+      <div class="node-collapsed">
+        <span class="node-index">06</span>
+        <span class="node-label">contact</span>
+      </div>
+      <div class="node-detail"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════
+       THEME
+    ═══════════════════════════════════════════ */
+    const root = document.documentElement;
+
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      buildConnections(); // refresh line colors
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    /* ═══════════════════════════════════════════
+       CONFIG
+    ═══════════════════════════════════════════ */
+    const CENTER = { lp: 50, tp: 50 };
+    const EXP_W  = 340;
+    const EXP_H  = 310;
+    const MARGIN = 24;
+
+    // Pixel offsets from viewport center (50%,50%) to each node's
+    // anchor point on the brain outline (brain SVG: 190×155px, viewBox 220×180).
+    // Computed as: dx = -95 + vx*(190/220),  dy = -77.5 + vy*(155/180)
+    const BRAIN_ANCHORS = {
+      'node-about':     { dx: -76, dy: -52 }, // upper-left  (viewBox ≈ 22,30)
+      'node-career':    { dx:   2, dy: -78 }, // top-center  (viewBox ≈ 112,0)
+      'node-work':      { dx:  74, dy: -55 }, // upper-right (viewBox ≈ 196,26)
+      'node-writing':   { dx:  85, dy:   7 }, // right side  (viewBox ≈ 207,98)
+      'node-interests': { dx: -19, dy:  62 }, // bottom      (viewBox ≈ 88,162)
+      'node-contact':   { dx: -81, dy:  -2 }, // left side   (viewBox ≈ 16,88)
+    };
+
+    function vx(p) { return window.innerWidth  * p / 100; }
+    function vy(p) { return window.innerHeight * p / 100; }
+
+    function getPct(el) {
+      return {
+        lp: parseFloat(el.dataset.origLeft  || el.style.left),
+        tp: parseFloat(el.dataset.origTop   || el.style.top),
+      };
+    }
+
+    function getPx(el) {
+      const { lp, tp } = getPct(el);
+      return { x: vx(lp), y: vy(tp) };
+    }
+
+    /* ═══════════════════════════════════════════
+       POPULATE NODE DETAILS
+    ═══════════════════════════════════════════ */
+    document.querySelectorAll('.node').forEach(node => {
+      const d = node.querySelector('.node-detail');
+      const footer = node.dataset.href ? `
+        <div class="node-detail-footer">
+          <a href="${node.dataset.href}" class="node-enter-link">
+            see more <span class="node-enter-arrow">→</span>
+          </a>
+          <div class="node-accent-dot"></div>
+        </div>` : '';
+      d.innerHTML = `
+        <div class="node-detail-top">
+          <span class="node-detail-num">${node.dataset.index}</span>
+          <button class="node-close" aria-label="close">×</button>
+        </div>
+        <div class="node-detail-title">${node.dataset.title}</div>
+        <div class="node-detail-divider"></div>
+        <p class="node-detail-body">${node.dataset.body}</p>
+        ${footer}`;
+      d.querySelector('.node-close').addEventListener('click', e => {
+        e.stopPropagation(); collapseAll();
+      });
+    });
+
+    // ── About node: custom detail with photo ──────────────────────
+    (function() {
+      const d = document.querySelector('#node-about .node-detail');
+      d.innerHTML = `
+        <div class="node-detail-top">
+          <span class="node-detail-num">01</span>
+          <button class="node-close" aria-label="close">×</button>
+        </div>
+        <div class="about-header">
+          <img src="./profile_pic.jpg" alt="Asmita Pramanik" class="about-photo">
+          <div class="about-identity">
+            <div class="about-name">Asmita Pramanik</div>
+            <div class="about-role">Software Development Engineer · Tesla</div>
+            <div class="about-degree">B.S. Computer Engineering, UIUC '25</div>
+          </div>
+        </div>
+        <div class="node-detail-divider"></div>
+        <p class="node-detail-body about-bio">Hi, I'm Asmita. I work on the systems that keep things moving at scale — currently in supply chain and logistics, at the intersection of agentic AI and distributed infrastructure.</p>
+        <div class="node-detail-footer">
+          <a href="about.html" class="node-enter-link">
+            see more <span class="node-enter-arrow">→</span>
+          </a>
+          <div class="node-accent-dot"></div>
+        </div>`;
+      d.querySelector('.node-close').addEventListener('click', e => {
+        e.stopPropagation(); collapseAll();
+      });
+    })();
+
+    // ── Contact node: inline links, no "see more" ─────────────────
+    (function() {
+      const d = document.querySelector('#node-contact .node-detail');
+      d.innerHTML = `
+        <div class="node-detail-top">
+          <span class="node-detail-num">06</span>
+          <button class="node-close" aria-label="close">×</button>
+        </div>
+        <div class="node-detail-title">contact</div>
+        <div class="node-detail-divider"></div>
+        <p class="node-detail-body">If something interests you or you'd like to collaborate, I'd love to hear from you.</p>
+        <div class="contact-links">
+          <a href="mailto:asmitapramanik3110@gmail.com" class="contact-link">
+            <span class="contact-link-label">email</span>
+            <span class="contact-link-value">asmitapramanik3110@gmail.com</span>
+          </a>
+          <a href="https://github.com/asmita002" target="_blank" rel="noopener" class="contact-link">
+            <span class="contact-link-label">github</span>
+            <span class="contact-link-value">github.com/asmita002</span>
+          </a>
+          <a href="https://www.linkedin.com/in/asmita-pramanik-69b58a1b1/" target="_blank" rel="noopener" class="contact-link">
+            <span class="contact-link-label">linkedin</span>
+            <span class="contact-link-value">asmita pramanik</span>
+          </a>
+        </div>`;
+      d.querySelector('.node-close').addEventListener('click', e => {
+        e.stopPropagation(); collapseAll();
+      });
+    })();
+
+    /* ═══════════════════════════════════════════
+       SVG CONNECTIONS
+    ═══════════════════════════════════════════ */
+    const svgEl  = document.getElementById('connections');
+    const NS     = 'http://www.w3.org/2000/svg';
+    const connMap = {};
+
+    function resolvedVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function makeLine(x1, y1, x2, y2, nodeId, crossOpacity) {
+      const l = document.createElementNS(NS, 'line');
+      l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+      l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+      l.classList.add('conn');
+      if (nodeId) {
+        l.id = 'conn-' + nodeId;
+        connMap[nodeId] = l;
+      }
+      if (crossOpacity !== undefined) {
+        l.style.strokeOpacity = crossOpacity;
+      }
+      // pick up line color from CSS variable at draw time
+      l.style.stroke = resolvedVar('--line');
+      svgEl.appendChild(l);
+      return l;
+    }
+
+    function buildConnections() {
+      svgEl.innerHTML = '';
+      Object.keys(connMap).forEach(k => delete connMap[k]);
+
+      const cx = vx(CENTER.lp);
+      const cy = vy(CENTER.tp);
+      const nodes = [...document.querySelectorAll('.node')];
+
+      nodes.forEach((node, i) => {
+        const { x, y } = getPx(node);
+        // Use brain perimeter anchor instead of raw center
+        const anchor = BRAIN_ANCHORS[node.id] || { dx: 0, dy: 0 };
+        const ax = cx + anchor.dx;
+        const ay = cy + anchor.dy;
+        const l = makeLine(ax, ay, x, y, node.id);
+        const delay = 0.9 + i * 0.16;
+        l.style.transition = `stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1) ${delay}s, stroke 0.4s ease, opacity 0.4s ease`;
+        requestAnimationFrame(() => { l.style.strokeDashoffset = '0'; });
+      });
+
+      // Semantic cross-connections (node ↔ node)
+      const cross = [
+        [nodes[0], nodes[1]], // about ↔ career
+        [nodes[1], nodes[2]], // career ↔ work
+        [nodes[4], nodes[5]], // bookmarks ↔ contact
+      ];
+      cross.forEach(([a, b]) => {
+        const pa = getPx(a), pb = getPx(b);
+        const l = makeLine(pa.x, pa.y, pb.x, pb.y, null, 0.35);
+        l.style.strokeDasharray = '2000';
+        l.style.strokeDashoffset = '2000';
+        l.style.transition = 'stroke-dashoffset 1.1s ease 1.9s, opacity 0.4s ease, stroke 0.4s ease';
+        requestAnimationFrame(() => { l.style.strokeDashoffset = '0'; });
+      });
+    }
+
+    /* ═══════════════════════════════════════════
+       EXPAND / COLLAPSE
+    ═══════════════════════════════════════════ */
+    let activeNode = null;
+
+    function expandNode(node) {
+      if (activeNode) collapseAll(false);
+      activeNode = node;
+
+      const { lp, tp } = getPct(node);
+      let cx = vx(lp);
+      let cy = vy(tp);
+      cx = Math.max(EXP_W / 2 + MARGIN, Math.min(window.innerWidth  - EXP_W / 2 - MARGIN, cx));
+      cy = Math.max(EXP_H / 2 + MARGIN, Math.min(window.innerHeight - EXP_H / 2 - MARGIN, cy));
+
+      node.style.left = cx + 'px';
+      node.style.top  = cy + 'px';
+      node.classList.add('expanded');
+
+      document.querySelectorAll('.node').forEach(n => {
+        if (n !== node) n.classList.add('dimmed');
+      });
+
+      const lineColor = resolvedVar('--line-hi');
+      Object.entries(connMap).forEach(([id, line]) => {
+        if (id === node.id) { line.style.stroke = lineColor; line.style.opacity = '1'; }
+        else line.style.opacity = '0.1';
+      });
+
+      document.getElementById('backdrop').classList.add('visible');
+      document.getElementById('hint').classList.add('hidden');
+    }
+
+    function collapseAll(restore = true) {
+      if (!activeNode) return;
+      if (restore) {
+        activeNode.style.left = activeNode.dataset.origLeft;
+        activeNode.style.top  = activeNode.dataset.origTop;
+      }
+      activeNode.classList.remove('expanded');
+      activeNode = null;
+
+      document.querySelectorAll('.node').forEach(n => n.classList.remove('dimmed'));
+
+      const lineColor = resolvedVar('--line');
+      Object.values(connMap).forEach(l => { l.style.stroke = lineColor; l.style.opacity = '1'; });
+
+      document.getElementById('backdrop').classList.remove('visible');
+      document.getElementById('hint').classList.remove('hidden');
+    }
+
+    document.getElementById('backdrop').addEventListener('click', () => collapseAll());
+
+    document.querySelectorAll('.node').forEach(node => {
+      node.dataset.origLeft = node.style.left;
+      node.dataset.origTop  = node.style.top;
+      node.addEventListener('click', () => {
+        if (!node.classList.contains('expanded')) expandNode(node);
+      });
+    });
+
+    /* ═══════════════════════════════════════════
+       INTRO
+    ═══════════════════════════════════════════ */
+    function runIntro() {
+      setTimeout(() => {
+        document.getElementById('title-center').style.animation =
+          'fadeInTitle 0.9s cubic-bezier(0.16,1,0.3,1) forwards';
+      }, 200);
+
+      document.querySelectorAll('.node').forEach((node, i) => {
+        setTimeout(() => node.classList.add('ready'), 800 + i * 110);
+      });
+
+      setTimeout(() => {
+        document.getElementById('corner').style.opacity = '1';
+        document.getElementById('theme-toggle').style.opacity = '1';
+        document.getElementById('hint').classList.add('visible');
+      }, 1700);
+
+      setTimeout(() => {
+        expandNode(document.getElementById('node-about'));
+      }, 2200);
+    }
+
+    /* ═══════════════════════════════════════════
+       INIT
+    ═══════════════════════════════════════════ */
+    // Apply saved theme (after all consts are declared)
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    root.setAttribute('data-theme', savedTheme);
+
+    buildConnections();
+    runIntro();
+
+    window.addEventListener('resize', () => {
+      if (activeNode) collapseAll(true);
+      buildConnections();
+    });
+  </script>
+</body>
+</html>

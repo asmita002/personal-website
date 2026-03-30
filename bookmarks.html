@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bookmarks — asmita pramanik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #D2CEEA; --text: #1E1B30; --text-dim: #6A6285;
+      --text-faint: #A8A2C4; --accent: #7264A8; --border: rgba(168,160,210,0.32);
+      --border-hi: rgba(130,120,190,0.52); --grain-op: 0.028;
+    }
+    [data-theme="dark"] {
+      --bg: #0B0A08; --text: #E2DAC8; --text-dim: #9A9080;
+      --text-faint: #504840; --accent: #C9A96E; --border: #2E2918;
+      --border-hi: #484030; --grain-op: 0.045;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cormorant Garamond', serif; color: var(--text); min-height: 100vh; transition: background 0.5s ease, color 0.4s ease; }
+    a { color: inherit; text-decoration: none; }
+    button { background: none; border: none; cursor: pointer; padding: 0; }
+    body {
+      background:
+        radial-gradient(ellipse 62% 110% at 12% 48%, #BDC8DC 0%, transparent 60%),
+        radial-gradient(ellipse 50% 75% at 38% 25%, #C8CEDF 0%, transparent 52%),
+        radial-gradient(ellipse 72% 72% at 78% 52%, #DDD6EC 0%, transparent 62%),
+        #D2CEEA;
+    }
+    [data-theme="dark"] body { background: #0B0A08; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");
+      opacity: var(--grain-op); pointer-events: none; z-index: 0; transition: opacity 0.5s ease;
+    }
+    .page-wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 32px 120px; }
+    nav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: 24px 0 20px; }
+    .nav-back { display: inline-flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-weight: 300; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); transition: color 0.25s ease, gap 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+    .nav-back:hover { color: var(--accent); gap: 12px; }
+    .nav-back-arrow { display: inline-block; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+    .nav-back:hover .nav-back-arrow { transform: translateX(-4px); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .nav-name { font-family: 'DM Mono', monospace; font-weight: 300; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); }
+    #theme-toggle { width: 34px; height: 18px; border-radius: 9px; background: var(--border-hi); border: 1px solid var(--border-hi); cursor: pointer; display: flex; align-items: center; padding: 2px; transition: background 0.4s ease, border-color 0.4s ease; }
+    #theme-toggle::after { content: ''; width: 12px; height: 12px; border-radius: 50%; background: var(--text-faint); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), background 0.4s ease; flex-shrink: 0; }
+    [data-theme="dark"] #theme-toggle::after { transform: translateX(16px); background: var(--accent); }
+    .coming-soon {
+      padding: 120px 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .coming-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .coming-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(36px, 5vw, 60px);
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      color: var(--text);
+    }
+    .coming-body {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 19px;
+      line-height: 1.7;
+      color: var(--text-dim);
+      max-width: 480px;
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <nav>
+    <a href="index.html" class="nav-back"><span class="nav-back-arrow">←</span> back to map</a>
+    <div class="nav-right">
+      <span class="nav-name">asmita pramanik</span>
+      <button id="theme-toggle" aria-label="Toggle dark mode"></button>
+    </div>
+  </nav>
+  <div class="coming-soon">
+    <p class="coming-eyebrow">05 · bookmarks</p>
+    <h1 class="coming-title">Come back<br>soon.</h1>
+    <p class="coming-body">This page is still being put together. Check back in a little while.</p>
+  </div>
+</div>
+<script>
+  const root = document.documentElement;
+  const saved = localStorage.getItem('theme') || 'dark';
+  root.setAttribute('data-theme', saved);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>experience — asmita pramanik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════════
+       TOKENS — LIGHT (default)
+    ═══════════════════════════════════════════ */
+    :root {
+      --bg:            #D2CEEA;
+      --surface:       rgba(255,255,255,0.58);
+      --surface-2:     rgba(255,255,255,0.82);
+      --surface-3:     rgba(255,255,255,0.95);
+      --border:        rgba(168,160,210,0.32);
+      --border-hi:     rgba(130,120,190,0.52);
+      --text:          #1E1B30;
+      --text-dim:      #6A6285;
+      --text-faint:    #A8A2C4;
+      --accent:        #7264A8;
+      --accent-dim:    #B0AACD;
+      --tag-bg:        rgba(114,100,168,0.08);
+      --tag-border:    rgba(114,100,168,0.2);
+      --timeline-line: rgba(160,152,205,0.4);
+      --grain-op:      0.028;
+    }
+
+    /* ═══════════════════════════════════════════
+       TOKENS — DARK
+    ═══════════════════════════════════════════ */
+    [data-theme="dark"] {
+      --bg:            #0B0A08;
+      --surface:       #181510;
+      --surface-2:     #1E1B14;
+      --surface-3:     #242018;
+      --border:        #2E2918;
+      --border-hi:     #484030;
+      --text:          #E2DAC8;
+      --text-dim:      #9A9080;
+      --text-faint:    #504840;
+      --accent:        #C9A96E;
+      --accent-dim:    #8A7040;
+      --tag-bg:        rgba(201,169,110,0.08);
+      --tag-border:    rgba(201,169,110,0.22);
+      --timeline-line: #2A2418;
+      --grain-op:      0.045;
+    }
+
+    /* ─── Reset ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.5s ease, color 0.4s ease;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { background: none; border: none; cursor: pointer; padding: 0; }
+
+    /* ─── Background ─────────────────────────── */
+    body {
+      background:
+        radial-gradient(ellipse 62% 110% at 12% 48%, #BDC8DC 0%, transparent 60%),
+        radial-gradient(ellipse 50% 75% at 38% 25%, #C8CEDF 0%, transparent 52%),
+        radial-gradient(ellipse 55% 65% at 42% 70%, #C6C2DD 0%, transparent 52%),
+        radial-gradient(ellipse 72% 72% at 78% 52%, #DDD6EC 0%, transparent 62%),
+        radial-gradient(ellipse 45% 55% at 62% 82%, #D8D0EA 0%, transparent 50%),
+        #D2CEEA;
+    }
+
+    [data-theme="dark"] body { background: #0B0A08; }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");
+      opacity: var(--grain-op);
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    /* ─── Layout ─────────────────────────────── */
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 32px 120px;
+    }
+
+    /* ─── Nav ────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0 20px;
+      background: transparent;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      transition: color 0.25s ease, gap 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .nav-back:hover { color: var(--accent); gap: 12px; }
+
+    .nav-back-arrow {
+      display: inline-block;
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .nav-back:hover .nav-back-arrow { transform: translateX(-4px); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-name {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    /* Theme toggle */
+    #theme-toggle {
+      width: 34px; height: 18px;
+      border-radius: 9px;
+      background: var(--border-hi);
+      border: 1px solid var(--border-hi);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 2px;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    #theme-toggle::after {
+      content: '';
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--text-faint);
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), background 0.4s ease;
+      flex-shrink: 0;
+    }
+
+    [data-theme="dark"] #theme-toggle::after {
+      transform: translateX(16px);
+      background: var(--accent);
+    }
+
+    /* ─── Hero ───────────────────────────────── */
+    .hero {
+      padding: 56px 0 64px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .hero-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-style: normal;
+      font-size: clamp(40px, 6vw, 72px);
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      color: var(--text);
+      margin-bottom: 24px;
+      transition: color 0.4s ease;
+    }
+
+    .hero-bio {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--text-dim);
+      max-width: 560px;
+      transition: color 0.4s ease;
+    }
+
+    .hero-links {
+      display: flex;
+      gap: 20px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    .hero-link {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.25s ease, gap 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .hero-link:hover { color: var(--accent); gap: 10px; }
+
+    /* ─── Section ────────────────────────────── */
+    section { padding: 60px 0 0; }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 36px;
+    }
+
+    /* ─── Timeline ───────────────────────────── */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 8px; bottom: 0;
+      width: 1px;
+      background: var(--timeline-line);
+      transition: background 0.4s ease;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 48px;
+    }
+
+    .timeline-item:last-child { padding-bottom: 0; }
+
+    .timeline-dot {
+      position: absolute;
+      left: -28px;
+      top: 7px;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      border: 1px solid var(--accent);
+      background: var(--surface-2);
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    .timeline-item:first-child .timeline-dot {
+      background: var(--accent);
+    }
+
+    .timeline-meta {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .timeline-company {
+      font-family: 'DM Mono', monospace;
+      font-weight: 400;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text);
+      transition: color 0.4s ease;
+    }
+
+    .timeline-company a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px solid var(--border-hi);
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .timeline-company a:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .timeline-dates {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      color: var(--text-faint);
+      white-space: nowrap;
+      transition: color 0.4s ease;
+    }
+
+    .timeline-role {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-style: normal;
+      font-size: 20px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+      transition: color 0.4s ease;
+    }
+
+    .timeline-location {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      color: var(--text-faint);
+      margin-bottom: 16px;
+    }
+
+    .timeline-bullets {
+      list-style: none;
+    }
+
+    .timeline-bullets li {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--text-dim);
+      padding-left: 14px;
+      position: relative;
+      margin-bottom: 8px;
+      transition: color 0.4s ease;
+    }
+
+    .timeline-bullets li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--accent-dim);
+      font-size: 12px;
+      top: 4px;
+    }
+
+    .timeline-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 8.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      border-radius: 4px;
+      padding: 3px 8px;
+      transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* ─── Projects Grid ──────────────────────── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 560px) { .projects-grid { grid-template-columns: 1fr; } }
+
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .project-card:hover {
+      background: var(--surface-2);
+      border-color: var(--border-hi);
+      box-shadow: 0 4px 24px rgba(100,90,160,0.08);
+    }
+
+    [data-theme="dark"] .project-card:hover {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    .project-num {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      color: var(--accent-dim);
+      margin-bottom: 10px;
+    }
+
+    .project-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-style: normal;
+      font-size: 20px;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 10px;
+      transition: color 0.4s ease;
+    }
+
+    .project-desc {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+      transition: color 0.4s ease;
+    }
+
+    .project-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .project-gh-link {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      white-space: nowrap;
+      transition: opacity 0.2s ease;
+    }
+
+    .project-gh-link:hover { opacity: 0.7; }
+
+    .project-private {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      white-space: nowrap;
+    }
+
+    /* ─── Education ──────────────────────────── */
+    .edu-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 30px;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    .edu-school {
+      font-family: 'DM Mono', monospace;
+      font-weight: 400;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .edu-degree {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-style: normal;
+      font-size: 22px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .edu-meta {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      color: var(--text-faint);
+      margin-bottom: 18px;
+    }
+
+    .edu-highlights {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .edu-pill {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 8.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      border-radius: 100px;
+      padding: 4px 12px;
+    }
+
+    .edu-courses {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .edu-courses-label {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 8px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 10px;
+    }
+
+    .edu-courses p {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text-dim);
+    }
+
+    /* ─── Skills ─────────────────────────────── */
+    .skills-group { margin-bottom: 24px; }
+
+    .skills-group:last-child { margin-bottom: 0; }
+
+    .skills-group-label {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 10px;
+    }
+
+    .skills-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+
+    /* ─── Footer ─────────────────────────────── */
+    footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-text {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 8.5px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    .footer-link {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 8.5px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      transition: opacity 0.2s ease;
+    }
+
+    .footer-link:hover { opacity: 0.7; }
+
+    /* ─── Divider ────────────────────────────── */
+    .divider {
+      width: 32px;
+      height: 1px;
+      background: var(--border-hi);
+      margin: 40px 0;
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ── Nav ──────────────────────────────────── -->
+  <nav>
+    <a href="index.html" class="nav-back">
+      <span class="nav-back-arrow">←</span> back to map
+    </a>
+    <div class="nav-right">
+      <span class="nav-name">asmita pramanik</span>
+      <button id="theme-toggle" aria-label="Toggle dark mode"></button>
+    </div>
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────── -->
+  <header class="hero">
+    <p class="hero-eyebrow">02 · experience</p>
+    <p class="hero-bio">
+      Software Development Engineer at Tesla on the Supply Chain and Logistics team.
+      I build at the intersection of AI, distributed systems and real-time systems design.
+    </p>
+    <div class="hero-links">
+      <a href="mailto:asmitapramanik3110@gmail.com" class="hero-link">asmitapramanik3110@gmail.com→</a>
+      <a href="https://github.com/asmita002" target="_blank" class="hero-link">github →</a>
+      <a href="https://www.linkedin.com/in/asmita-pramanik-69b58a1b1/" target="_blank" class="hero-link">linkedin →</a>
+    </div>
+  </header>
+
+  <!-- ── Experience ───────────────────────────── -->
+  <section>
+    <p class="section-label">work experience</p>
+    <div class="timeline">
+
+      <!-- Tesla Full-Time -->
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-meta">
+          <span class="timeline-company"><a href="https://www.tesla.com/" target="_blank" rel="noopener">Tesla, Inc.</a></span>
+          <span class="timeline-dates">May 2025 — Present</span>
+        </div>
+        <p class="timeline-role">Software Engineer — Supply Chain & Logistics</p>
+        <p class="timeline-location">Fremont, CA</p>
+        <ul class="timeline-bullets">
+          <li>Full-time SWE on the Supply Chain and Logistics team, building systems that move goods and data at Tesla's global scale.</li>
+        </ul>
+        <div class="timeline-tags">
+          <span class="tag">Full-Time</span>
+          <span class="tag">Supply Chain</span>
+          <span class="tag">Logistics</span>
+        </div>
+      </div>
+
+      <!-- Tesla Intern -->
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-meta">
+          <span class="timeline-company"><a href="https://www.tesla.com/" target="_blank" rel="noopener">Tesla, Inc.</a></span>
+          <span class="timeline-dates">Sep 2024 — May 2025</span>
+        </div>
+        <p class="timeline-role">Software Engineering Intern — Factory Team</p>
+        <p class="timeline-location">Fremont, CA</p>
+        <ul class="timeline-bullets">
+          <li>Built agentic AI features for demand planning, global trade compliance, and supply chain logistics using LangGraph and LangChain to enhance automation, decision-making, and system efficiency.</li>
+          <li>Developed a full-stack property management application with new REST API endpoints for Tesla's Warp ERP system using .NET, Angular, and MySQL — centralizing logistics workflows into a master database to optimize global shipment execution.</li>
+        </ul>
+        <div class="timeline-tags">
+          <span class="tag">LangGraph</span>
+          <span class="tag">LangChain</span>
+          <span class="tag">.NET</span>
+          <span class="tag">Angular</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">REST API</span>
+          <span class="tag">Agentic AI</span>
+        </div>
+      </div>
+
+      <!-- Synchrony -->
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-meta">
+          <span class="timeline-company"><a href="https://www.synchrony.com/" target="_blank" rel="noopener">Synchrony Financial</a></span>
+          <span class="timeline-dates">May — Aug 2024</span>
+        </div>
+        <p class="timeline-role">Software Engineering Intern — Generative AI</p>
+        <p class="timeline-location">Champaign, IL</p>
+        <ul class="timeline-bullets">
+          <li>Developed and evaluated proof-of-concepts for AI Builder — including training models on large datasets to enhance PII removal capabilities and testing OCR recognition with n-gram similarity analysis for Power Automate and Power Apps.</li>
+          <li>Supported deployment of an in-house GenAI chatbot from development to production, and managed a database of legal attestation forms distributed company-wide to enforce authorized usage and optimize compliance workflows.</li>
+        </ul>
+        <div class="timeline-tags">
+          <span class="tag">Generative AI</span>
+          <span class="tag">OCR</span>
+          <span class="tag">Power Automate</span>
+          <span class="tag">Power Apps</span>
+          <span class="tag">PII</span>
+          <span class="tag">Python</span>
+        </div>
+      </div>
+
+      <!-- HeRA Group -->
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-meta">
+          <span class="timeline-company"><a href="https://www.ilie.ece.illinois.edu/" target="_blank" rel="noopener">HeRA Group, UIUC</a></span>
+          <span class="timeline-dates">Feb 2023 — Feb 2024</span>
+        </div>
+        <p class="timeline-role">Student Researcher — Heliophysics Research and Applications</p>
+        <p class="timeline-location">Champaign, IL · Prof. Raluca Ilie</p>
+        <ul class="timeline-bullets">
+          <li>Utilized the Space Weather Modeling Framework (SWMF) to perform multi-fluid simulations of ion trajectories during solar storms, analyzing effects on Earth's magnetosphere and planetary habitability.</li>
+          <li>Used Tecplot 360 and Matplotlib to generate visual representations of simulation data, studying the impact of energetic ions on Earth's magnetosphere.</li>
+        </ul>
+        <div class="timeline-tags">
+          <span class="tag">SWMF</span>
+          <span class="tag">Python</span>
+          <span class="tag">Matplotlib</span>
+          <span class="tag">Tecplot 360</span>
+          <span class="tag">Space Physics</span>
+        </div>
+      </div>
+
+      <!-- Space Weather Summer School -->
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-meta">
+          <span class="timeline-company">University of Michigan College of Engineering</span>
+          <span class="timeline-dates">Jul — Aug 2023</span>
+        </div>
+        <p class="timeline-role">Space Weather Programming Summer School</p>
+        <p class="timeline-location">Ann Arbor, MI · Certified: MIT · NASA · NSF</p>
+        <ul class="timeline-bullets">
+          <li>Under mentors from MIT, UC San Diego, and University of Michigan — built expertise in Python numerical tools, space weather simulations, 1D ionosphere modeling, and applied machine learning to scientific datasets including CHAMP satellite data.</li>
+        </ul>
+        <div class="timeline-tags">
+          <span class="tag">Python</span>
+          <span class="tag">MATLAB</span>
+          <span class="tag">NumPy</span>
+          <span class="tag">SciPy</span>
+          <span class="tag">ML</span>
+        </div>
+      </div>
+
+      <!-- iSEE -->
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-meta">
+          <span class="timeline-company"><a href="https://sustainability.illinois.edu/" target="_blank" rel="noopener">iSEE, UIUC</a></span>
+          <span class="timeline-dates">Oct 2022 — Mar 2023</span>
+        </div>
+        <p class="timeline-role">Research Intern — Institute for Sustainability, Energy, and Environment</p>
+        <p class="timeline-location">Champaign, IL</p>
+        <ul class="timeline-bullets">
+          <li>Used Fusion360 and AutoCAD to design 3D-printed enclosure prototypes for proximity, IR, and thermal sensors deployed in crop fields to monitor and analyze farming conditions.</li>
+          <li>Ensured sensor protection and optimal performance in challenging agricultural environments, contributing to improved data collection and farming efficiency.</li>
+        </ul>
+        <div class="timeline-tags">
+          <span class="tag">Fusion360</span>
+          <span class="tag">AutoCAD</span>
+          <span class="tag">3D Modeling</span>
+          <span class="tag">Embedded Sensors</span>
+        </div>
+      </div>
+
+      <!-- Immersive Lab -->
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-meta">
+          <span class="timeline-company"><a href="https://www.ilie.ece.illinois.edu/immersive-learning-lab/explore-the-lab" target="_blank" rel="noopener">Immersive Learning Lab, UIUC</a></span>
+          <span class="timeline-dates">Jun 2023 — Jan 2024</span>
+        </div>
+        <p class="timeline-role">Software Developer</p>
+        <p class="timeline-location">Champaign, IL</p>
+        <ul class="timeline-bullets">
+          <li>Created a Unity VR game using C# to vividly demonstrate Ampere's Law — increasing app engagement and making abstract physics concepts tangible for students.</li>
+          <li>Implemented software solutions to transform traditional classroom teaching into immersive VR experiences, resulting in increased student participation and knowledge retention.</li>
+        </ul>
+        <div class="timeline-tags">
+          <span class="tag">Unity</span>
+          <span class="tag">C#</span>
+          <span class="tag">VR</span>
+          <span class="tag">XR Development</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Projects ──────────────────────────────── -->
+  <section>
+    <p class="section-label">selected projects</p>
+    <div class="projects-grid">
+
+      <div class="project-card">
+        <p class="project-num">01</p>
+        <p class="project-name">x86 Operating System</p>
+        <p class="project-desc">Secure single-core kernel from scratch with Linux-like functionality — scheduling for 6 concurrent tasks, paging-only virtual memory, read-only filesystem, and multiple interactive shells.</p>
+        <div class="project-footer">
+          <div class="timeline-tags">
+            <span class="tag">C</span>
+            <span class="tag">x86 Assembly</span>
+          </div>
+          <span class="project-private">private repo</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <p class="project-num">02</p>
+        <p class="project-name">Safe and Sound</p>
+        <p class="project-desc">Full-stack web app for personalized housing recommendations in Los Angeles, leveraging Google Cloud Platform for backend SQL queries with dynamic data filtering.</p>
+        <div class="project-footer">
+          <div class="timeline-tags">
+            <span class="tag">Flask</span>
+            <span class="tag">React</span>
+            <span class="tag">MySQL</span>
+            <span class="tag">GCP</span>
+          </div>
+          <span class="project-private">private repo</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <p class="project-num">03</p>
+        <p class="project-name">Career Guidance Platform</p>
+        <p class="project-desc">User-friendly web application curating a database of 150+ majors with detailed descriptions and career pathways — built to improve career exploration for students.</p>
+        <div class="project-footer">
+          <div class="timeline-tags">
+            <span class="tag">HTML</span>
+            <span class="tag">CSS</span>
+            <span class="tag">JavaScript</span>
+          </div>
+          <a href="https://github.com/asmita002/WebDev_CareerGuidance" target="_blank" class="project-gh-link">github →</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <p class="project-num">04</p>
+        <p class="project-name">Ultrasonic Drying Optimization</p>
+        <p class="project-desc">Predictive ML model for optimizing the ultrasonic drying process — reducing time and improving accuracy using Box-Cox normalization and Akaike Information Criterion.</p>
+        <div class="project-footer">
+          <div class="timeline-tags">
+            <span class="tag">Python</span>
+            <span class="tag">SciPy</span>
+            <span class="tag">ML Modeling</span>
+          </div>
+          <a href="https://github.com/asmita002/data-analysis-using-Akaike-Information-Criterion" target="_blank" class="project-gh-link">github →</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <p class="project-num">05</p>
+        <p class="project-name">Snoozefest</p>
+        <p class="project-desc">Final project for CS415 Game Development — a fully playable game built from the ground up as part of UIUC's game dev course.</p>
+        <div class="project-footer">
+          <div class="timeline-tags">
+            <span class="tag">Game Dev</span>
+            <span class="tag">CS415</span>
+          </div>
+          <a href="https://github.com/asmita002/Snoozefest" target="_blank" class="project-gh-link">github →</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <p class="project-num">06</p>
+        <p class="project-name">Space Weather Modeling</p>
+        <p class="project-desc">Analyzed atmospheric dynamics, solar influence, and density patterns in Earth's upper atmosphere using CHAMP satellite data and JB2008 atmospheric models.</p>
+        <div class="project-footer">
+          <div class="timeline-tags">
+            <span class="tag">Python</span>
+            <span class="tag">MATLAB</span>
+            <span class="tag">NumPy</span>
+            <span class="tag">SciPy</span>
+          </div>
+          <a href="https://github.com/asmita002/Space-Weather-Modeling-with-CHAMP-and-JB2008-Data" target="_blank" class="project-gh-link">github →</a>
+        </div>
+      </div>
+
+
+      <div class="project-card">
+        <p class="project-num">07</p>
+        <p class="project-name">Ionosphere Model</p>
+        <p class="project-desc">Time-dependent ionospheric chemical model simulating the evolution of O⁺, N₂⁺, O₂⁺, and NO⁺ ions using neutral species densities, thermospheric temperature profiles, and solar ionization rates. Developed during Space Weather Summer School 2023.</p>
+        <div class="project-footer">
+          <div class="timeline-tags">
+            <span class="tag">Python</span>
+            <span class="tag">NumPy</span>
+            <span class="tag">SciPy</span>
+            <span class="tag">Space Physics</span>
+          </div>
+          <a href="https://github.com/asmita002/Ionosphere-Model" target="_blank" class="project-gh-link">github →</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <p class="project-num">08</p>
+        <p class="project-name">FPGA Celeste</p>
+        <p class="project-desc">Recreation of the game Celeste implemented on an FPGA platform as an ECE 385 final project — combining digital logic design in VHDL/Verilog with C software to port a game to Xilinx hardware using Vivado and Vitis toolchains.</p>
+        <div class="project-footer">
+          <div class="timeline-tags">
+            <span class="tag">VHDL</span>
+            <span class="tag">Verilog</span>
+            <span class="tag">C</span>
+            <span class="tag">Vivado</span>
+            <span class="tag">FPGA</span>
+          </div>
+          <a href="https://github.com/asmita002/FPGA_Celeste" target="_blank" class="project-gh-link">github →</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Education ─────────────────────────────── -->
+  <section>
+    <p class="section-label">education</p>
+    <div class="edu-block">
+      <p class="edu-school">University of Illinois Urbana-Champaign</p>
+      <p class="edu-degree">BS Computer Engineering</p>
+      <p class="edu-meta">August 2021 — May 2025 &nbsp;·&nbsp; Grainger College of Engineering</p>
+      <div class="edu-courses">
+        <p class="edu-courses-label">Relevant Coursework</p>
+        <p>Computer Systems Engineering · Database Systems · Artificial Intelligence · Applied Machine Learning · Data Structures & Algorithms · Digital Systems Laboratory · Introduction to Algorithms · Product Design & Development · Management of Technology & Innovation · Analog Signal Processing</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Skills ────────────────────────────────── -->
+  <section>
+    <p class="section-label">technical skills</p>
+
+    <div class="skills-group">
+      <p class="skills-group-label">Languages</p>
+      <div class="skills-tags">
+        <span class="tag">C++</span><span class="tag">Python</span><span class="tag">JavaScript</span>
+        <span class="tag">TypeScript</span><span class="tag">C#</span><span class="tag">C</span>
+        <span class="tag">Java</span><span class="tag">MySQL</span><span class="tag">SystemVerilog</span>
+        <span class="tag">HTML / CSS</span><span class="tag">XML</span>
+      </div>
+    </div>
+
+    <div class="skills-group">
+      <p class="skills-group-label">Frameworks & Libraries</p>
+      <div class="skills-tags">
+        <span class="tag">LangChain</span><span class="tag">LangGraph</span>
+        <span class="tag">.NET</span><span class="tag">Angular</span>
+        <span class="tag">React</span><span class="tag">Node.js</span>
+        <span class="tag">Flask</span><span class="tag">PyTorch</span>
+        <span class="tag">TensorFlow</span><span class="tag">MongoDB</span>
+        <span class="tag">NumPy</span><span class="tag">Pandas</span>
+        <span class="tag">Matplotlib</span><span class="tag">SciPy</span>
+      </div>
+    </div>
+
+    <div class="skills-group">
+      <p class="skills-group-label">Tools & Platforms</p>
+      <div class="skills-tags">
+        <span class="tag">Git / GitHub</span><span class="tag">Docker</span>
+        <span class="tag">AWS</span><span class="tag">GCP</span>
+        <span class="tag">Kubernetes</span><span class="tag">Kafka</span>
+        <span class="tag">Redis</span><span class="tag">Figma</span>
+        <span class="tag">Unity</span><span class="tag">MATLAB</span>
+        <span class="tag">JIRA</span><span class="tag">REST API</span>
+        <span class="tag">Vivado</span><span class="tag">Unreal Engine</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────── -->
+  <footer>
+    <span class="footer-text">asmita pramanik · 2025</span>
+    <a href="index.html" class="footer-link">← back to mind map</a>
+  </footer>
+
+</div>
+
+<script>
+  const root = document.documentElement;
+  const toggle = document.getElementById('theme-toggle');
+
+  // Sync theme with main site
+  const saved = localStorage.getItem('theme') || 'dark';
+  root.setAttribute('data-theme', saved);
+
+  toggle.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+</script>
+</body>
+</html>

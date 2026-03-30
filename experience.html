@@ -404,6 +404,31 @@
       transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
+    .project-card-img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      opacity: 0.85;
+      transition: opacity 0.3s ease;
+    }
+
+    .project-card:hover .project-card-img { opacity: 1; }
+
+    .project-detail-link {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      white-space: nowrap;
+      transition: opacity 0.2s ease;
+    }
+
+    .project-detail-link:hover { opacity: 0.7; }
+
     .project-card:hover {
       background: var(--surface-2);
       border-color: var(--border-hi);
@@ -897,6 +922,7 @@
 
 
       <div class="project-card">
+        <img src="./ionosphere_plot.png" alt="O+ ion density heatmap" class="project-card-img" />
         <p class="project-num">07</p>
         <p class="project-name">Ionosphere Model</p>
         <p class="project-desc">Time-dependent ionospheric chemical model simulating the evolution of O⁺, N₂⁺, O₂⁺, and NO⁺ ions using neutral species densities, thermospheric temperature profiles, and solar ionization rates. Developed during Space Weather Summer School 2023.</p>
@@ -907,7 +933,10 @@
             <span class="tag">SciPy</span>
             <span class="tag">Space Physics</span>
           </div>
-          <a href="https://github.com/asmita002/Ionosphere-Model" target="_blank" class="project-gh-link">github →</a>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <a href="ionosphere-model.html" class="project-detail-link">details →</a>
+            <a href="https://github.com/asmita002/Ionosphere-Model" target="_blank" class="project-gh-link">github →</a>
+          </div>
         </div>
       </div>
 

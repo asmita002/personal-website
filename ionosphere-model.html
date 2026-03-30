@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ionosphere model — asmita pramanik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #D2CEEA; --surface: rgba(255,255,255,0.58); --surface-2: rgba(255,255,255,0.82);
+      --border: rgba(168,160,210,0.32); --border-hi: rgba(130,120,190,0.52);
+      --text: #1E1B30; --text-dim: #6A6285; --text-faint: #A8A2C4;
+      --accent: #7264A8; --accent-dim: #B0AACD;
+      --tag-bg: rgba(114,100,168,0.08); --tag-border: rgba(114,100,168,0.2);
+      --grain-op: 0.028;
+    }
+    [data-theme="dark"] {
+      --bg: #0B0A08; --surface: #181510; --surface-2: #1E1B14;
+      --border: #2E2918; --border-hi: #484030;
+      --text: #E2DAC8; --text-dim: #9A9080; --text-faint: #504840;
+      --accent: #C9A96E; --accent-dim: #8A7040;
+      --tag-bg: rgba(201,169,110,0.08); --tag-border: rgba(201,169,110,0.22);
+      --grain-op: 0.045;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cormorant Garamond', serif; color: var(--text); min-height: 100vh; transition: background 0.5s ease, color 0.4s ease; }
+    a { color: inherit; text-decoration: none; }
+    button { background: none; border: none; cursor: pointer; padding: 0; }
+    body {
+      background:
+        radial-gradient(ellipse 62% 110% at 12% 48%, #BDC8DC 0%, transparent 60%),
+        radial-gradient(ellipse 50% 75% at 38% 25%, #C8CEDF 0%, transparent 52%),
+        radial-gradient(ellipse 55% 65% at 42% 70%, #C6C2DD 0%, transparent 52%),
+        radial-gradient(ellipse 72% 72% at 78% 52%, #DDD6EC 0%, transparent 62%),
+        #D2CEEA;
+    }
+    [data-theme="dark"] body { background: #0B0A08; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");
+      opacity: var(--grain-op); pointer-events: none; z-index: 0; transition: opacity 0.5s ease;
+    }
+    .page-wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 32px 120px; }
+
+    /* Nav */
+    nav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: 24px 0 20px; }
+    .nav-back { display: inline-flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-weight: 300; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); transition: color 0.25s ease, gap 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+    .nav-back:hover { color: var(--accent); gap: 12px; }
+    .nav-back-arrow { display: inline-block; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+    .nav-back:hover .nav-back-arrow { transform: translateX(-4px); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .nav-name { font-family: 'DM Mono', monospace; font-weight: 300; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); }
+    #theme-toggle { width: 34px; height: 18px; border-radius: 9px; background: var(--border-hi); border: 1px solid var(--border-hi); cursor: pointer; display: flex; align-items: center; padding: 2px; transition: background 0.4s ease, border-color 0.4s ease; }
+    #theme-toggle::after { content: ''; width: 12px; height: 12px; border-radius: 50%; background: var(--text-faint); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), background 0.4s ease; flex-shrink: 0; }
+    [data-theme="dark"] #theme-toggle::after { transform: translateX(16px); background: var(--accent); }
+
+    /* Hero */
+    .hero { padding: 56px 0 64px; border-bottom: 1px solid var(--border); }
+    .hero-eyebrow { font-family: 'DM Mono', monospace; font-weight: 300; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+    .hero-title { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(36px, 5.5vw, 68px); letter-spacing: -0.03em; line-height: 1.05; color: var(--text); margin-bottom: 20px; }
+    .hero-meta { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
+    .hero-meta-item { font-family: 'DM Mono', monospace; font-weight: 300; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); }
+    .hero-meta-item span { color: var(--accent); margin-right: 6px; }
+    .hero-desc { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 19px; line-height: 1.75; color: var(--text-dim); max-width: 600px; margin-bottom: 28px; }
+    .hero-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .hero-link { font-family: 'DM Mono', monospace; font-weight: 300; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); display: inline-flex; align-items: center; gap: 6px; transition: color 0.25s ease, gap 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+    .hero-link:hover { color: var(--accent); gap: 10px; }
+    .hero-tags { display: flex; gap: 7px; flex-wrap: wrap; }
+    .tag { font-family: 'DM Mono', monospace; font-weight: 300; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); background: var(--tag-bg); border: 1px solid var(--tag-border); border-radius: 4px; padding: 3px 8px; }
+
+    /* Sections */
+    section { padding: 60px 0 0; }
+    .section-label { font-family: 'DM Mono', monospace; font-weight: 300; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); margin-bottom: 32px; }
+
+    /* Prose */
+    .prose { max-width: 640px; }
+    .prose p { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 18px; line-height: 1.75; color: var(--text-dim); margin-bottom: 22px; }
+    .prose p:last-child { margin-bottom: 0; }
+
+    /* Equation block */
+    .eq-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      padding: 20px 24px;
+      margin: 28px 0;
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.9;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    /* Species grid */
+    .species-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+    @media (max-width: 560px) { .species-grid { grid-template-columns: repeat(2, 1fr); } }
+    .species-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    .species-card:hover { background: var(--surface-2); border-color: var(--border-hi); }
+    .species-ion {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 24px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .species-desc {
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 8px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      line-height: 1.6;
+    }
+
+    /* Plot image */
+    .plot-wrap {
+      margin-top: 32px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .plot-img { display: block; width: 100%; }
+    .plot-caption {
+      padding: 12px 16px;
+      background: var(--surface);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 8.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      transition: background 0.4s ease;
+    }
+
+    /* Steps */
+    .step-list { display: flex; flex-direction: column; gap: 20px; margin-top: 8px; }
+    .step-item { display: flex; gap: 20px; align-items: flex-start; }
+    .step-num { font-family: 'DM Mono', monospace; font-weight: 300; font-size: 9px; letter-spacing: 0.14em; color: var(--accent); flex-shrink: 0; padding-top: 3px; width: 24px; }
+    .step-text { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 17px; line-height: 1.65; color: var(--text-dim); }
+
+    /* Callout */
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-top: 32px;
+    }
+    .callout-label { font-family: 'DM Mono', monospace; font-weight: 300; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+    .callout-text { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 17px; line-height: 1.7; color: var(--text-dim); }
+
+    /* Footer */
+    footer { margin-top: 80px; padding-top: 32px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-text { font-family: 'DM Mono', monospace; font-weight: 300; font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); }
+    .footer-link { font-family: 'DM Mono', monospace; font-weight: 300; font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); transition: opacity 0.2s ease; }
+    .footer-link:hover { opacity: 0.7; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <nav>
+    <a href="experience.html" class="nav-back"><span class="nav-back-arrow">←</span> back to experience</a>
+    <div class="nav-right">
+      <span class="nav-name">asmita pramanik</span>
+      <button id="theme-toggle" aria-label="Toggle dark mode"></button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <p class="hero-eyebrow">project · space weather summer school 2023</p>
+    <h1 class="hero-title">Ionosphere<br>Chemistry Model</h1>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span>·</span> Python · NumPy · SciPy</div>
+      <div class="hero-meta-item"><span>·</span> University of Michigan, Summer 2023</div>
+      <div class="hero-meta-item"><span>·</span> Group 4 — Asmita, Emily, Hyeonghun, Tinatin, Shreejan</div>
+    </div>
+    <p class="hero-desc">
+      A time-dependent ionospheric chemical model that simulates the evolution of four key ion species across altitude and time, using neutral atmospheric densities, thermospheric temperature profiles, and solar EUV ionization rates.
+    </p>
+    <div class="hero-links">
+      <a href="https://github.com/asmita002/Ionosphere-Model" target="_blank" rel="noopener" class="hero-link">github →</a>
+    </div>
+  </header>
+
+  <!-- Overview -->
+  <section>
+    <p class="section-label">overview</p>
+    <div class="prose">
+      <p>
+        The ionosphere is the ionized upper layer of Earth's atmosphere, stretching from roughly 60 to 1000 km in altitude. It is shaped by solar radiation, which strips electrons from neutral atmospheric species and produces a complex mix of ions. Understanding how these ion concentrations evolve over time and altitude is fundamental to space weather research.
+      </p>
+      <p>
+        This project builds a simplified but physically grounded chemical scheme for the ionosphere. Given known neutral densities and a thermospheric temperature profile, the model integrates a system of coupled differential equations forward in time to track how four ion species rise, peak, and decay across the altitude range of 100 to 300 km.
+      </p>
+    </div>
+  </section>
+
+  <!-- Ion species -->
+  <section>
+    <p class="section-label">modelled ion species</p>
+    <div class="species-grid">
+      <div class="species-card">
+        <div class="species-ion">O<sup>+</sup></div>
+        <div class="species-desc">Ionized atomic oxygen. Dominant at higher altitudes. Long lifetime due to low recombination rate.</div>
+      </div>
+      <div class="species-card">
+        <div class="species-ion">O<sub>2</sub><sup>+</sup></div>
+        <div class="species-desc">Ionized molecular oxygen. Peaks at lower altitudes. Quickly recombines with free electrons.</div>
+      </div>
+      <div class="species-card">
+        <div class="species-ion">N<sub>2</sub><sup>+</sup></div>
+        <div class="species-desc">Ionized molecular nitrogen. Short-lived; reacts rapidly to form NO<sup>+</sup> through charge transfer.</div>
+      </div>
+      <div class="species-card">
+        <div class="species-ion">NO<sup>+</sup></div>
+        <div class="species-desc">Nitric oxide ion. The most abundant ion in the lower ionosphere. Terminal product of N<sub>2</sub><sup>+</sup> reactions.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Physics -->
+  <section>
+    <p class="section-label">physics and methodology</p>
+    <div class="prose">
+      <p>
+        The core of the model is a system of coupled ordinary differential equations, one per ion species, representing the balance between production and loss at each altitude level. Production is driven by solar EUV photoionization, which was provided externally by a radiative transfer team as spectral ionization rates from the EUVAC solar flux model. Loss is governed by ion-neutral reaction rates that depend on the local temperature and neutral densities.
+      </p>
+    </div>
+
+    <div class="eq-block">
+      dc/dt = D(c_in − c) + Sr(c, T, p)<br><br>
+      where c is the vector of ion concentrations, D is the dilution rate,<br>
+      T is thermospheric temperature, and Sr captures all chemical source and sink terms.
+    </div>
+
+    <div class="prose">
+      <p>
+        The temperature profile was initialized as a hyperbolic tangent function that rises from 200 K at 100 km to approximately 700 K at 300 km, matching observed thermospheric gradients. Neutral species (O, O<sub>2</sub>, N<sub>2</sub>) were initialized with boundary conditions derived from standard atmospheric models and propagated vertically via the hydrostatic equation.
+      </p>
+      <p>
+        The stoichiometry of the reaction network was encoded as a 9-species by 13-reaction matrix, capturing all relevant production and loss pathways. The team attempted to solve the full system using <code style="font-family:'DM Mono',monospace;font-size:0.85em;">scipy.integrate.solve_ivp</code> with the LSODA adaptive integrator (which switches between stiff and non-stiff methods). Dimensional issues encountered during integration led to the team solving each species sequentially in a steady-state first approach before attempting the fully coupled time-dependent solution.
+      </p>
+    </div>
+  </section>
+
+  <!-- Approach -->
+  <section>
+    <p class="section-label">approach</p>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">01</div>
+        <div class="step-text">Imported thermospheric temperature and neutral density profiles for O, O<sub>2</sub>, and N<sub>2</sub> across 41 altitude levels from 100 to 300 km.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">02</div>
+        <div class="step-text">Computed solar EUV ionization rates using the EUVAC model, incorporating the F10.7 and F10.7a solar activity indices and a solar zenith angle.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">03</div>
+        <div class="step-text">Solved for each ion species in steady state first (one at a time), validating the chemistry before coupling the full system.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">04</div>
+        <div class="step-text">Extended to a time-dependent reactor model, integrating the full coupled ODE system using <code style="font-family:'DM Mono',monospace;font-size:0.85em;">solve_ivp</code> with the LSODA method for stiff equations.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">05</div>
+        <div class="step-text">Generated 2D heatmaps of ion density as a function of altitude and time, and compared all four species against each other.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section>
+    <p class="section-label">results</p>
+    <div class="prose">
+      <p>
+        The model successfully reproduced physically consistent density profiles for all four ion species. O<sup>+</sup> peaks around 125 km with a characteristic dome shape in time, reflecting the slow ionization buildup and gradual recombination. N<sub>2</sub><sup>+</sup> concentrations are highest near 100 km and drop sharply with altitude, consistent with the rapid charge-transfer reactions that consume it. The combined density plot shows clearly how the four species occupy different altitude regimes and evolve on different timescales.
+      </p>
+    </div>
+
+    <div class="plot-wrap">
+      <img src="./ionosphere_plot.png" alt="O+ ion density variation with altitude and time" class="plot-img" />
+      <div class="plot-caption">O⁺ ion density (m⁻³) as a function of altitude (km) and normalized time — output from the chemical model</div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-label">reflections</div>
+      <div class="callout-text">The primary challenge was managing the dimensional consistency of the stoichiometry matrix when transitioning between altitude-indexed arrays and per-species rate vectors. The team did not complete the full coupled matrix solve within the time constraints of the summer school, but the per-species results validated the underlying chemistry. Given more time, the natural next step would be completing the reactor model integration and extending the altitude range toward the F-region peak.</div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="footer-text">asmita pramanik · 2025</span>
+    <a href="experience.html" class="footer-link">back to experience →</a>
+  </footer>
+
+</div>
+<script>
+  const root = document.documentElement;
+  const saved = localStorage.getItem('theme') || 'dark';
+  root.setAttribute('data-theme', saved);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+</script>
+</body>
+</html>
